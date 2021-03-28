@@ -12,12 +12,13 @@
 // @grant	none
 // ==/UserScript==
 
+// @ts-check
+
 (async function mercator_studio() {
   "use strict";
 
   // Create shadow root
   const $host = document.createElement("aside");
-  const shadow = $host.attachShadow({ mode: "open" });
 
   // Create form
   const $main = document.createElement("main");
@@ -282,11 +283,13 @@ input#letterbox {
   $form.append($style);
 
   // Create inputs
-
   const savedValues = JSON.parse(
     window.localStorage.getItem("mercator-studio-values")
   );
 
+  /**
+   * @param {string} key
+   */
   function createInput(key) {
     const $input = document.createElement("input");
     $input.id = key;
@@ -294,10 +297,12 @@ input#letterbox {
       $input.type = "checkbox";
     } else {
       $input.type = "range";
-      $input.min = ["scale", "pillarbox", "letterbox"].includes(key) ? 0 : -1;
-      $input.max = 1;
-      $input.step = 0.00001;
-      $input.value = 0;
+      $input.min = ["scale", "pillarbox", "letterbox"].includes(key)
+        ? "0"
+        : "-1";
+      $input.max = "1";
+      $input.step = "0.00001";
+      $input.value = "0";
     }
     $input.classList.add("input");
 
@@ -316,15 +321,20 @@ input#letterbox {
     })
   );
 
+  /** @type {{[k: string]: number}} */
   const values = Object.fromEntries(
     Object.entries(inputs).map((entry) => [
       entry[0],
-      entry[1].valueAsNumber || entry[1].value,
+      entry[1].valueAsNumber || +entry[1].value,
     ])
   );
 
+  /**
+   * @param {HTMLInputElement} $input
+   * @param {number} value
+   */
   function updateValue($input, value) {
-    values[$input.id] = $input.value = value;
+    values[$input.id] = $input.valueAsNumber = value;
     window.localStorage.setItem(
       "mercator-studio-values",
       JSON.stringify(values)
@@ -333,7 +343,11 @@ input#letterbox {
 
   // Right click to individually reset
   $form.addEventListener("contextmenu", (event) => {
-    if (event.target.type !== "range") return;
+    if (
+      !(event.target instanceof HTMLInputElement) ||
+      event.target.type !== "range"
+    )
+      return;
     event.preventDefault();
     updateValue(event.target, 0);
   });
@@ -341,7 +355,8 @@ input#letterbox {
   // Update value on change
   $form.addEventListener("input", (event) => {
     const $input = event.target;
-    updateValue($input, $input.valueAsNumber);
+    if ($input instanceof HTMLInputElement)
+      updateValue($input, $input.valueAsNumber);
   });
 
   const $presetsLabel = document.createElement("label");
@@ -360,7 +375,7 @@ input#letterbox {
     event.preventDefault();
 
     // Reset all
-    Object.values(inputs).forEach((input) => {
+    Object.values(inputs).forEach((/** @type {any} */ input) => {
       updateValue(input, 0);
     });
   });
@@ -369,14 +384,12 @@ input#letterbox {
   $previews.id = "previews";
 
   // Create preview video
-
   const $video = document.createElement("video");
   $video.setAttribute("playsinline", "");
   $video.setAttribute("autoplay", "");
   $video.setAttribute("muted", "");
 
   // Create canvases
-
   const canvases = Object.fromEntries(
     ["buffer", "freeze", "display"].map((name) => {
       const element = document.createElement("canvas");
@@ -398,7 +411,6 @@ input#letterbox {
 
   $main.append($collapse, $form, $previews);
 
-  shadow.append($main, svg);
   document.body.append($host);
 
   let drawInterval = 0;
@@ -406,6 +418,9 @@ input#letterbox {
   // Background Blur for Google Meet does this (hello@brownfoxlabs.com)
 
   class mercator_studio_MediaStream extends MediaStream {
+    /**
+     * @param {MediaStream} oldStream
+     */
     constructor(oldStream) {
       // Copy original stream settings
       super(oldStream);
@@ -415,7 +430,9 @@ input#letterbox {
 
       const w = oldStreamSettings.width;
       const h = oldStreamSettings.height;
-      Object.values(canvases).forEach((canvas) => {
+      Object.values(canvases).forEach((
+        /** @type {{ element: HTMLCanvasElement; }} */ canvas
+      ) => {
         canvas.element.width = w;
         canvas.element.height = h;
       });
@@ -426,8 +443,8 @@ input#letterbox {
         image: document.createElement("img"),
         canvas: canvases.freeze,
       };
-      inputs.freeze.addEventListener("change", (e) => {
-        freeze.state = freeze.init = e.target.checked;
+      inputs.freeze.addEventListener("change", function () {
+        freeze.state = freeze.init = this.checked;
       });
 
       context.textAlign = "center";
@@ -483,9 +500,12 @@ input#letterbox {
       drawInterval = setInterval(draw, 33);
 
       // Create a MediaStream from our display canvas and return it as the new MediaStream
+      // @ts-expect-error
       const newStream = canvases.display.element.captureStream(30);
       newStream.addEventListener("inactive", () => {
-        oldStream.getTracks().forEach((track) => {
+        oldStream.getTracks().forEach((
+          /** @type {{ stop: () => void; }} */ track
+        ) => {
           track.stop();
         });
         canvases.display.context.clearRect(0, 0, w, h);
@@ -495,16 +515,22 @@ input#letterbox {
     }
   }
 
+  /**
+   * @param {{ video: any; audio: any; }} constraints
+   */
   async function hooked_getUserMedia(constraints) {
     if (constraints && constraints.video && !constraints.audio) {
       return new mercator_studio_MediaStream(
+        // @ts-expect-error
         await navigator.mediaDevices.old_getUserMedia(constraints)
       );
     } else {
+      // @ts-expect-error
       return navigator.mediaDevices.old_getUserMedia(constraints);
     }
   }
 
+  // @ts-expect-error
   MediaDevices.prototype.old_getUserMedia = MediaDevices.prototype.getUserMedia;
   MediaDevices.prototype.getUserMedia = hooked_getUserMedia;
 })();
