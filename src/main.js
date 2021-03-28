@@ -1,10 +1,3 @@
-// ==UserScript==
-// @name      Zeno
-// @namespace PurpleMyst
-// @match     https://meet.google.com/*
-// @grant     none
-// ==/UserScript==
-
 // @ts-check
 
 (async function mercator_studio() {

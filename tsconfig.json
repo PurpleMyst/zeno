@@ -4,5 +4,5 @@
     "lib": ["ES2019", "DOM"],
     "noEmit": true
   },
-  "files": ["script.js"]
+  "include": ["src/*"]
 }
