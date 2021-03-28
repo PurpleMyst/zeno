@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name	Mercator Studio for Google Meet
+// @name	MStudio
 // @version	1.17.4
 // @description	Change how you look on Google Meet.
 // @author	Xing <dev@x-ing.space> (https://x-ing.space)
@@ -411,6 +411,7 @@ input#letterbox {
 
   $main.append($collapse, $form, $previews);
 
+  $host.append($main);
   document.body.append($host);
 
   let drawInterval = 0;
