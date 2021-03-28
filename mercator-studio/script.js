@@ -418,7 +418,7 @@ input#letterbox {
 
   // Background Blur for Google Meet does this (hello@brownfoxlabs.com)
 
-  class mercator_studio_MediaStream extends MediaStream {
+  class HookedMediaStream extends MediaStream {
     /**
      * @param {MediaStream} oldStream
      */
@@ -517,21 +517,22 @@ input#letterbox {
   }
 
   /**
-   * @param {{ video: any; audio: any; }} constraints
+   * Intercept the user's camera to hook our patched MediaStream onto it
+   * @param {{ video: unknown; audio: unknown; }} constraints
    */
-  async function hooked_getUserMedia(constraints) {
+  async function hookedGetUserMedia(constraints) {
     if (constraints && constraints.video && !constraints.audio) {
-      return new mercator_studio_MediaStream(
+      return new HookedMediaStream(
         // @ts-expect-error
-        await navigator.mediaDevices.old_getUserMedia(constraints)
+        await navigator.mediaDevices.oldGetUserMedia(constraints)
       );
     } else {
       // @ts-expect-error
-      return navigator.mediaDevices.old_getUserMedia(constraints);
+      return navigator.mediaDevices.oldGetUserMedia(constraints);
     }
   }
 
   // @ts-expect-error
-  MediaDevices.prototype.old_getUserMedia = MediaDevices.prototype.getUserMedia;
-  MediaDevices.prototype.getUserMedia = hooked_getUserMedia;
+  MediaDevices.prototype.oldGetUserMedia = MediaDevices.prototype.getUserMedia;
+  MediaDevices.prototype.getUserMedia = hookedGetUserMedia;
 })();
