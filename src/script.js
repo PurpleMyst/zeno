@@ -1,15 +1,8 @@
 // ==UserScript==
-// @name	MStudio
-// @version	1.17.4
-// @description	Change how you look on Google Meet.
-// @author	Xing <dev@x-ing.space> (https://x-ing.space)
-// @copyright	2021, Xing (https://x-ing.space)
-// @license	MIT License; https://x-ing.space/mercator/LICENSE
-// @namespace	https://x-ing.space
-// @homepageURL	https://x-ing.space/mercator
-// @icon	https://x-ing.space/mercator/icon.png
-// @match	https://meet.google.com/*
-// @grant	none
+// @name      Zeno
+// @namespace PurpleMyst
+// @match     https://meet.google.com/*
+// @grant     none
 // ==/UserScript==
 
 // @ts-check
