@@ -52,9 +52,7 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
       $input.type = "checkbox";
     } else {
       $input.type = "range";
-      $input.min = ["scale", "pillarbox", "letterbox"].includes(key)
-        ? "0"
-        : "-1";
+      $input.min = ["pillarbox", "letterbox"].includes(key) ? "0" : "-1";
       $input.max = "1";
       $input.step = "0.00001";
       $input.value = "0";
