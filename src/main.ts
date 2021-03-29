@@ -1,11 +1,7 @@
 import styleCss from "./style.css";
 
-import {
-  HookedMediaStream,
-  Canvases,
-  Inputs,
-  Values,
-} from "./hookedMediaStream";
+import { HookedMediaStream, Inputs, Values } from "./hookedMediaStream";
+import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
 
 (async function zeno() {
   "use strict";
@@ -43,7 +39,7 @@ import {
 
   // Create inputs
   const savedValues = JSON.parse(
-    window.localStorage.getItem("zeno-values") ?? ""
+    window.localStorage.getItem("zeno-values") ?? "{}"
   );
 
   function createInput(key: string) {
@@ -83,6 +79,7 @@ import {
       entry[1].valueAsNumber || +entry[1].value,
     ])
   ) as Values;
+
   function updateValue($input: HTMLInputElement, value: number) {
     (values as any)[$input.id] = $input.valueAsNumber = value;
 
@@ -131,27 +128,23 @@ import {
   const $previews = document.createElement("div");
   $previews.id = "previews";
 
-  // Create preview video
-  const $video = document.createElement("video");
-  $video.setAttribute("playsinline", "");
-  $video.setAttribute("autoplay", "");
-  $video.setAttribute("muted", "");
-
-  // Create canvases
-  const canvases = Object.fromEntries(
-    ["buffer", "freeze", "display"].map((name) => {
-      const element = document.createElement("canvas");
-      const context = element.getContext("2d");
-      return [name, { element, context }];
-    })
-  ) as Canvases;
   // Create title
-
   const $title = document.createElement("h1");
-
   $title.textContent = "↓ Zeno Studio ↓";
 
-  $previews.append($minimize, $video, canvases.buffer.element, $title);
+  const $previewContainer = document.createElement("div");
+  $previewContainer.id = "preview-container";
+
+  const $videoPreviewContainer = document.createElement("div");
+  $videoPreviewContainer.id = VIDEO_PREVIEW_CONTAINER;
+  $videoPreviewContainer.classList.add("preview");
+
+  const $displayPreviewContainer = document.createElement("div");
+  $displayPreviewContainer.id = DISPLAY_PREVIEW_CONTAINER;
+  $displayPreviewContainer.classList.add("preview");
+
+  $previewContainer.append($videoPreviewContainer, $displayPreviewContainer);
+  $previews.append($minimize, $previewContainer, $title);
 
   // Add UI to page
   $form.append($presetsLabel);
@@ -171,10 +164,8 @@ import {
     if (constraints && constraints.video && !constraints.audio) {
       return new HookedMediaStream(
         await (navigator.mediaDevices as any).oldGetUserMedia(constraints),
-        canvases,
         inputs,
-        values,
-        $video
+        values
       );
     } else {
       return (navigator.mediaDevices as any).oldGetUserMedia(constraints);

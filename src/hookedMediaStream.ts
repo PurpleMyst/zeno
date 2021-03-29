@@ -1,11 +1,12 @@
-let drawInterval: NodeJS.Timeout;
+import {
+  createCanvas,
+  DISPLAY_PREVIEW_CONTAINER,
+  DoubleBufferCanvas,
+  VIDEO_PREVIEW_CONTAINER,
+} from "./utils";
 
-export type Canvases = {
-  [k in "buffer" | "freeze" | "display"]: {
-    element: HTMLCanvasElement;
-    context: CanvasRenderingContext2D;
-  };
-};
+// FIXME: make this per-instance
+let drawInterval: any;
 
 export type Inputs = {
   [k in "pillarbox" | "letterbox" | "freeze"]: HTMLInputElement;
@@ -16,84 +17,96 @@ export type Values = { [k in keyof Inputs]: number };
 // Background Blur for Google Meet does this (hello@brownfoxlabs.com)
 
 export class HookedMediaStream extends MediaStream {
-  constructor(
-    oldStream: MediaStream,
-    canvases: Canvases,
-    inputs: Inputs,
-    values: Values,
-    $video: HTMLVideoElement
-  ) {
+  constructor(oldStream: MediaStream, inputs: Inputs, values: Values) {
     // Copy original stream settings
     super(oldStream);
+
+    // Create preview video
+    const $video = document.createElement("video");
+    $video.setAttribute("playsinline", "");
+    $video.setAttribute("autoplay", "");
+    $video.setAttribute("muted", "");
     $video.srcObject = oldStream;
 
+    // Read width/height from old stream
     const oldStreamSettings = oldStream.getVideoTracks()[0]!.getSettings();
-    const w = oldStreamSettings.width!;
-    const h = oldStreamSettings.height!;
+    const width = oldStreamSettings.width!;
+    const height = oldStreamSettings.height!;
 
-    Object.values(canvases).forEach((canvas) => {
-      canvas.element.width = w;
-      canvas.element.height = h;
-    });
+    // Create our double buffer
+    const doubleBuffer = new DoubleBufferCanvas(width, height);
 
-    const context = canvases.buffer.context;
-    const freeze = {
-      state: false,
-      init: false,
-      image: document.createElement("img"),
-      canvas: canvases.freeze,
+    // Put video and display preview in their place
+    const $videoPreviewContainer = document.getElementById(
+      VIDEO_PREVIEW_CONTAINER
+    );
+    $videoPreviewContainer?.append($video);
+    const $displayPreviewContainer = document.getElementById(
+      DISPLAY_PREVIEW_CONTAINER
+    );
+    $displayPreviewContainer?.append(doubleBuffer.buffer.element);
+
+    const freezeState = {
+      activated: false,
+      needToInitialize: false,
+      image: new Image(),
+      canvas: createCanvas(),
     };
+    freezeState.canvas.element.width = width;
+    freezeState.canvas.element.height = height;
 
     inputs.freeze.addEventListener("change", function () {
-      freeze.state = freeze.init = this.checked;
+      freezeState.activated = freezeState.needToInitialize = this.checked;
     });
 
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-
     function draw() {
-      context.clearRect(0, 0, w, h);
+      const context = doubleBuffer.buffer.context;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+
+      context.clearRect(0, 0, width, height);
 
       // Get values
-      const pillarbox = (values.pillarbox * w) / 2;
-      const letterbox = (values.letterbox * h) / 2;
+      const pillarbox = (values.pillarbox * width) / 2;
+      const letterbox = (values.letterbox * height) / 2;
 
-      if (freeze.init) {
-        // Initialize frozen image
-        freeze.canvas.context.drawImage($video, 0, 0, w, h);
-        let data = freeze.canvas.element.toDataURL("image/png");
-        freeze.image.setAttribute("src", data);
-        freeze.init = false;
-      } else if (freeze.state) {
+      if (freezeState.activated) {
+        if (freezeState.needToInitialize) {
+          // Initialize frozen image
+          freezeState.canvas.context.drawImage($video, 0, 0, width, height);
+          const src = freezeState.canvas.element.toDataURL("image/png");
+          freezeState.image.src = src;
+          freezeState.needToInitialize = false;
+        }
+
         // Draw frozen image
-        context.drawImage(freeze.image, 0, 0, w, h);
+        context.drawImage(freezeState.image, 0, 0, width, height);
       } else if ($video.srcObject) {
         // Draw video
-        context.drawImage($video, 0, 0, w, h);
+        context.drawImage($video, 0, 0, width, height);
       } else {
         // Draw preview stripes if video doesn't exist
         "18, 100%, 68%; -10,100%,80%; 5, 90%, 72%; 48, 100%, 75%; 36, 100%, 70%; 20, 90%, 70%"
           .split(";")
           .forEach((color, index) => {
             context.fillStyle = `hsl(${color})`;
-            context.fillRect((index * w) / 6, 0, w / 6, h);
+            context.fillRect((index * width) / 6, 0, width / 6, height);
           });
       }
 
       // Pillarbox: crop width
       if (pillarbox) {
-        context.clearRect(0, 0, pillarbox, h);
-        context.clearRect(w, 0, -pillarbox, h);
+        context.clearRect(0, 0, pillarbox, height);
+        context.clearRect(width, 0, -pillarbox, height);
       }
 
       // Letterbox: crop height
       if (letterbox) {
-        context.clearRect(0, 0, w, letterbox);
-        context.clearRect(0, h, w, -letterbox);
+        context.clearRect(0, 0, width, letterbox);
+        context.clearRect(0, height, width, -letterbox);
       }
 
-      canvases.display.context.clearRect(0, 0, w, h);
-      canvases.display.context.drawImage(canvases.buffer.element, 0, 0);
+      doubleBuffer.blit();
     }
 
     // Redraw at 30FPS
@@ -102,12 +115,13 @@ export class HookedMediaStream extends MediaStream {
 
     // Create a MediaStream from our display canvas and return it as the new MediaStream
     // @ts-expect-error
-    const newStream = canvases.display.element.captureStream(30);
+    const newStream = doubleBuffer.display.element.captureStream(30);
     newStream.addEventListener("inactive", () => {
-      oldStream.getTracks().forEach((track: { stop: () => void }) => {
-        track.stop();
-      });
-      canvases.display.context.clearRect(0, 0, w, h);
+      // FIXME: since this does not seem to get fired, check newStream.active in draw() and clearInterval if needed
+      // If the new stream goes inactive, stop everything
+      oldStream.getTracks().forEach((track) => track.stop());
+      doubleBuffer.display.context.clearRect(0, 0, width, height);
+      $displayPreviewContainer?.removeChild(doubleBuffer.buffer.element);
       $video.srcObject = null;
     });
     return newStream;

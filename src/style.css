@@ -10,9 +10,11 @@
     transition: all 0s;
   }
 }
+
 :focus {
   outline: 0;
 }
+
 main {
   z-index: 99999;
   position: fixed;
@@ -59,6 +61,7 @@ main.minimize {
   width: 1rem;
   padding-right: 0;
 }
+
 #minimize {
   font-family: inherit;
   font-size: 0.5rem;
@@ -87,15 +90,16 @@ main.minimize {
 .minimize #minimize:hover::before {
   margin-left: 0;
 }
+
 #previews {
-  margin-top: 1rem;
-  height: 3rem;
+  /* margin-top: 1rem; */
+  height: 100%;
   display: flex;
 }
-#previews > video,
-#previews > canvas {
-  height: 100%;
-  width: auto;
+
+#previews video,
+#previews canvas {
+  /* show pretty background */
   background-image: linear-gradient(
     90deg,
     hsl(18, 100%, 68%) 16.7%,
@@ -109,9 +113,28 @@ main.minimize {
     hsl(36, 100%, 70%) 83.3%,
     hsl(20, 90%, 70%) 83.3%
   );
-  margin-right: 1rem;
 }
-#previews > h1 {
+
+#preview-container {
+  width: inherit;
+  display: flex;
+  justify-content: center;
+}
+
+.preview {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+#preview-container video,
+#preview-container canvas {
+  width: inherit;
+  height: 100%;
+}
+
+#previews h1 {
   flex-grow: 1;
   font-size: 1rem;
   font-weight: normal;
@@ -119,19 +142,32 @@ main.minimize {
   color: #444;
   line-height: 1.5rem;
 }
-:hover > #previews > h1 {
+
+:hover #previews h1 {
   transform: translateY(0.1rem); /* Tiny nudge downwards */
 }
-.focus > #previews > h1 {
+
+.focus #previews h1 {
   display: none;
 }
-.focus > #previews {
+
+#preview-container {
+  width: inherit;
+}
+
+/* Show/hide the previews if focused/unfocused */
+#preview-container {
+  display: none;
+}
+
+.focus #preview-container {
+  display: flex;
+}
+
+.focus #previews {
   height: auto;
 }
-.focus > #previews > * {
-  height: auto;
-  width: calc(50% - 0.5rem);
-}
+
 #presets,
 label {
   display: flex;
@@ -149,41 +185,42 @@ label {
 #presets > :last-child {
   border-radius: 0 100px 100px 0;
 }
+
 label {
   height: 2rem;
 }
+
 label > * {
   width: calc(100% - 6.5rem);
 }
+
 label > *,
 #collapse {
   height: 1.5rem;
   border-radius: 0.75rem;
   border: 0.25rem solid lightgray;
 }
+
 label > :hover,
 #collapse:hover {
   border: 0.25rem solid gray;
 }
+
 #presets > :hover {
   background: #0003;
 }
+
 #presets > :focus {
   background: black;
   color: white;
 }
+
 #presets:focus-within,
 #collapse:focus,
 label > :focus {
   border-color: black;
 }
-textarea {
-  text-align: center;
-  font-family: inherit;
-  font-weight: bold;
-  resize: none;
-  line-height: 1;
-}
+
 input[type="range"] {
   -webkit-appearance: none;
   --gradient: transparent, transparent;
@@ -194,6 +231,7 @@ input[type="range"] {
   background: linear-gradient(90deg, var(--gradient)),
     linear-gradient(90deg, var(--rainbow));
 }
+
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   background: white;
@@ -202,55 +240,12 @@ input[type="range"]::-webkit-slider-thumb {
   border: 0.25rem solid black;
   border-radius: 0.5rem;
 }
+
 input[type="range"]:focus::-webkit-slider-thumb {
   border-color: white;
   background: black;
 }
-input#exposure,
-input#fog,
-input#vignette {
-  --gradient: black, #8880, white;
-}
-input#contrast {
-  --gradient: gray, #8880;
-}
-input#temperature {
-  --gradient: #88f, #8880, #ff8;
-}
-input#tint {
-  --gradient: #f8f, #8880, #8f8;
-}
-input#sepia {
-  --gradient: #8880, #aa8;
-}
-input#hue,
-input#rotate {
-  background: linear-gradient(
-    90deg,
-    hsl(0, 80%, 75%),
-    hsl(60, 80%, 75%),
-    hsl(120, 80%, 75%),
-    hsl(180, 80%, 75%),
-    hsl(240, 80%, 75%),
-    hsl(300, 80%, 75%),
-    hsl(0, 80%, 75%),
-    hsl(60, 80%, 75%),
-    hsl(120, 80%, 75%),
-    hsl(180, 80%, 75%),
-    hsl(240, 80%, 75%),
-    hsl(300, 80%, 75%),
-    hsl(0, 80%, 75%)
-  );
-}
-input#saturate {
-  --gradient: gray, #8880 50%, blue, magenta;
-}
-input#blur {
-  --gradient: #8880, gray;
-}
-input#scale,
-input#x,
-input#y,
+
 input#pillarbox,
 input#letterbox {
   --gradient: black, white;
