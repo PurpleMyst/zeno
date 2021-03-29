@@ -14,7 +14,12 @@ export type Values = { [k in keyof Inputs]: number };
 // Background Blur for Google Meet does this (hello@brownfoxlabs.com)
 
 export class HookedMediaStream extends MediaStream {
-  constructor(oldStream: MediaStream, inputs: Inputs, values: Values) {
+  constructor(
+    oldStream: MediaStream,
+    inputs: Inputs,
+    values: Values,
+    shadowRoot: ShadowRoot
+  ) {
     // Copy original stream settings
     super(oldStream);
 
@@ -34,11 +39,11 @@ export class HookedMediaStream extends MediaStream {
     const doubleBuffer = new DoubleBufferCanvas(width, height);
 
     // Put video and display preview in their place
-    const $videoPreviewContainer = document.getElementById(
+    const $videoPreviewContainer = shadowRoot.getElementById(
       VIDEO_PREVIEW_CONTAINER
     );
     $videoPreviewContainer?.append($video);
-    const $displayPreviewContainer = document.getElementById(
+    const $displayPreviewContainer = shadowRoot.getElementById(
       DISPLAY_PREVIEW_CONTAINER
     );
     $displayPreviewContainer?.append(doubleBuffer.buffer.element);

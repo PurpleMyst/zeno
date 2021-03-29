@@ -6,8 +6,9 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
 (async function zeno() {
   "use strict";
 
-  // Create aside
+  // Create aside and its shadow DOM to allow isolating its CSS
   const $host = document.createElement("aside");
+  const $shadow = $host.attachShadow({ mode: "open" });
 
   // Create main element and make it focus on click
   const $main = document.createElement("main");
@@ -38,7 +39,6 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
   const $form = document.createElement("form");
   const $style = document.createElement("style");
   $style.textContent = styleCss;
-  $form.append($style);
 
   // Create inputs
   const savedValues = JSON.parse(
@@ -107,7 +107,7 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
       updateValue($input, $input.valueAsNumber);
   });
 
-  //
+  // Create reset button
   const $resetLabel = document.createElement("label");
 
   const $reset = document.createElement("button");
@@ -156,7 +156,7 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
   // Add the UI to the page
   $form.append($resetLabel);
   $main.append($collapse, $form, $previews);
-  $host.append($main);
+  $shadow.append($main, $style);
   document.body.append($host);
 
   /** Intercept the user's camera to hook our patched MediaStream onto it */
@@ -168,7 +168,8 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
       return new HookedMediaStream(
         await (navigator.mediaDevices as any).oldGetUserMedia(constraints),
         inputs,
-        values
+        values,
+        $shadow
       );
     } else {
       return (navigator.mediaDevices as any).oldGetUserMedia(constraints);
