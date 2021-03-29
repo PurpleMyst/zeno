@@ -6,24 +6,26 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
 (async function zeno() {
   "use strict";
 
-  // Create shadow root
+  // Create aside
   const $host = document.createElement("aside");
 
-  // Create form
+  // Create main element and make it focus on click
   const $main = document.createElement("main");
-  $main.addEventListener("click", (event) => {
-    if (!$main.classList.contains("focus") && event.target !== $collapse) {
-      $main.classList.add("focus");
-    }
+  $main.addEventListener("click", () => {
+    $main.classList.add("focus");
   });
 
+  // Create collapse button
   const $collapse = document.createElement("button");
   $collapse.textContent = "↑ collapse ↑";
   $collapse.id = "collapse";
-  $collapse.addEventListener("click", () => {
+  $collapse.addEventListener("click", (event) => {
+    // Stop propagation to avoid running the above $main "click" event listener
+    event.stopPropagation();
     $main.classList.remove("focus");
   });
 
+  // Create "super tiny mode" button
   const $minimize = document.createElement("button");
   $minimize.id = "minimize";
   $minimize.title = "toggle super tiny mode";
@@ -32,6 +34,7 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
     $main.classList.toggle("minimize");
   });
 
+  // Create form and apply our style.css
   const $form = document.createElement("form");
   const $style = document.createElement("style");
   $style.textContent = styleCss;
@@ -86,7 +89,7 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
     window.localStorage.setItem("zeno-values", JSON.stringify(values));
   }
 
-  // Right click to individually reset
+  // Reset the input on right click
   $form.addEventListener("contextmenu", (event) => {
     if (
       !(event.target instanceof HTMLInputElement) ||
@@ -104,59 +107,59 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
       updateValue($input, $input.valueAsNumber);
   });
 
-  const $presetsLabel = document.createElement("label");
-  const $presetsCollection = document.createElement("div");
-  $presetsCollection.id = "reset";
+  //
+  const $resetLabel = document.createElement("label");
 
   const $reset = document.createElement("button");
-  $reset.textContent = $reset.id = "reset";
-  $presetsLabel.textContent = "presets";
+  $reset.textContent = "do it";
+  $reset.id = "reset";
+  $resetLabel.textContent = "reset";
 
-  $presetsCollection.append($reset);
-  $presetsLabel.append($presetsCollection);
+  $resetLabel.append($reset);
 
-  $presetsLabel.addEventListener("click", (event) => {
-    // Cancel refresh
+  $resetLabel.addEventListener("click", (event) => {
     event.preventDefault();
 
-    // Reset all
-    Object.values(inputs).forEach(($input: HTMLInputElement) => {
-      updateValue($input, 0);
-    });
+    // Reset all inputs
+    Object.values(inputs).forEach(($input) => updateValue($input, 0));
   });
 
+  // Create previews
   const $previews = document.createElement("div");
   $previews.id = "previews";
+
+  // Create the preview container
+  const $previewContainer = document.createElement("div");
+  $previewContainer.id = "preview-container";
+
+  // Create the raw video preview
+  const $videoPreviewContainer = document.createElement("div");
+  $videoPreviewContainer.id = VIDEO_PREVIEW_CONTAINER;
+  $videoPreviewContainer.classList.add("preview");
+
+  // Create the filtered video preview
+  const $displayPreviewContainer = document.createElement("div");
+  $displayPreviewContainer.id = DISPLAY_PREVIEW_CONTAINER;
+  $displayPreviewContainer.classList.add("preview");
+
+  // Add them to the preview container
+  $previewContainer.append($videoPreviewContainer, $displayPreviewContainer);
 
   // Create title
   const $title = document.createElement("h1");
   $title.textContent = "↓ Zeno Studio ↓";
 
-  const $previewContainer = document.createElement("div");
-  $previewContainer.id = "preview-container";
-
-  const $videoPreviewContainer = document.createElement("div");
-  $videoPreviewContainer.id = VIDEO_PREVIEW_CONTAINER;
-  $videoPreviewContainer.classList.add("preview");
-
-  const $displayPreviewContainer = document.createElement("div");
-  $displayPreviewContainer.id = DISPLAY_PREVIEW_CONTAINER;
-  $displayPreviewContainer.classList.add("preview");
-
-  $previewContainer.append($videoPreviewContainer, $displayPreviewContainer);
+  // Append everything to the $previews
+  // XXX: could we move $minimize and $title out of $previews?
   $previews.append($minimize, $previewContainer, $title);
 
-  // Add UI to page
-  $form.append($presetsLabel);
-
+  // Add the UI to the page
+  $form.append($resetLabel);
   $main.append($collapse, $form, $previews);
-
   $host.append($main);
   document.body.append($host);
 
-  /**
-   * Intercept the user's camera to hook our patched MediaStream onto it
-   */
+  /** Intercept the user's camera to hook our patched MediaStream onto it */
   async function hookedGetUserMedia(constraints: {
     video: unknown;
     audio: unknown;
