@@ -48,15 +48,30 @@ main #collapse {
 main.focus {
   transform: none;
   border-radius: 0;
-  padding: 1rem;
+  padding-bottom: 1rem;
   cursor: default;
-}
-main.focus #minimize {
-  display: none;
 }
 main.minimize {
   width: 1rem;
   padding-right: 0;
+}
+
+main.minimize :not(#fold),
+main.minimize #fold :not(#minimize) {
+  display: none;
+}
+
+main.minimize #minimize {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+main.minimize #title {
+  opacity: 0;
+}
+
+main.focus #fold {
+  opacity: 0;
 }
 
 /* Minimize button */
@@ -73,6 +88,7 @@ main.minimize {
   background: white;
   cursor: pointer;
   overflow-wrap: anywhere;
+  transition: margin-bottom 0s;
 }
 #minimize::before {
   content: "◀";
@@ -143,10 +159,6 @@ main.minimize {
 
 :hover #title {
   transform: translateY(0.1rem); /* Tiny nudge downwards */
-}
-
-.focus #title {
-  display: none;
 }
 
 /* Turn the "fold" into a CSS grid. */

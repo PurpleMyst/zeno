@@ -13,6 +13,7 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
   // Create main element and make it focus on click
   const $main = document.createElement("main");
   $main.addEventListener("click", () => {
+    $main.classList.remove("minimize");
     $main.classList.add("focus");
   });
 
