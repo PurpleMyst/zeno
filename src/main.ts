@@ -122,6 +122,8 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
     Object.values(inputs).forEach(($input) => updateValue($input, 0));
   });
 
+  $form.append($resetLabel);
+
   // Create previews
   const $previews = document.createElement("div");
   $previews.id = "previews";
@@ -145,15 +147,18 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
 
   // Create title
   const $title = document.createElement("h1");
+  $title.id = "title";
   $title.textContent = "↓ Zeno Studio ↓";
 
   // Append everything to the $previews
-  // XXX: could we move $minimize and $title out of $previews?
-  $previews.append($minimize, $previewContainer, $title);
+  $previews.append($previewContainer);
+
+  const $fold = document.createElement("div");
+  $fold.id = "fold";
+  $fold.append($minimize, $title);
 
   // Add the UI to the page
-  $form.append($resetLabel);
-  $main.append($collapse, $form, $previews);
+  $main.append($collapse, $form, $previews, $fold);
   $shadow.append($main, $style);
   document.body.append($host);
 
