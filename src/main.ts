@@ -7,7 +7,7 @@ import {
   Values,
 } from "./hookedMediaStream";
 
-(async function mercator_studio() {
+(async function zeno() {
   "use strict";
 
   // Create shadow root
@@ -43,7 +43,7 @@ import {
 
   // Create inputs
   const savedValues = JSON.parse(
-    window.localStorage.getItem("mercator-studio-values") ?? ""
+    window.localStorage.getItem("zeno-values") ?? ""
   );
 
   function createInput(key: string) {
@@ -86,10 +86,7 @@ import {
   function updateValue($input: HTMLInputElement, value: number) {
     (values as any)[$input.id] = $input.valueAsNumber = value;
 
-    window.localStorage.setItem(
-      "mercator-studio-values",
-      JSON.stringify(values)
-    );
+    window.localStorage.setItem("zeno-values", JSON.stringify(values));
   }
 
   // Right click to individually reset
@@ -152,7 +149,7 @@ import {
 
   const $title = document.createElement("h1");
 
-  $title.textContent = "↓ Mercator Studio ↓";
+  $title.textContent = "↓ Zeno Studio ↓";
 
   $previews.append($minimize, $video, canvases.buffer.element, $title);
 
