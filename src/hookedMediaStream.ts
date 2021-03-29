@@ -5,9 +5,6 @@ import {
   VIDEO_PREVIEW_CONTAINER,
 } from "./utils";
 
-// FIXME: make this per-instance
-let drawInterval: any;
-
 export type Inputs = {
   [k in "pillarbox" | "letterbox" | "freeze"]: HTMLInputElement;
 };
@@ -107,23 +104,23 @@ export class HookedMediaStream extends MediaStream {
       }
 
       doubleBuffer.blit();
+
+      if (!newStream.active) {
+        oldStream.getTracks().forEach((track) => track.stop());
+        doubleBuffer.display.context.clearRect(0, 0, width, height);
+        $displayPreviewContainer?.removeChild(doubleBuffer.buffer.element);
+        $videoPreviewContainer?.removeChild($video);
+        $video.srcObject = null;
+        clearInterval(drawInterval);
+      }
     }
 
     // Redraw at 30FPS
-    clearInterval(drawInterval);
-    drawInterval = setInterval(draw, 33);
+    const drawInterval = setInterval(draw, 33);
 
-    // Create a MediaStream from our display canvas and return it as the new MediaStream
+    // Create a MediaStream from our display canvas
     // @ts-expect-error
     const newStream = doubleBuffer.display.element.captureStream(30);
-    newStream.addEventListener("inactive", () => {
-      // FIXME: since this does not seem to get fired, check newStream.active in draw() and clearInterval if needed
-      // If the new stream goes inactive, stop everything
-      oldStream.getTracks().forEach((track) => track.stop());
-      doubleBuffer.display.context.clearRect(0, 0, width, height);
-      $displayPreviewContainer?.removeChild(doubleBuffer.buffer.element);
-      $video.srcObject = null;
-    });
     return newStream;
   }
 }
