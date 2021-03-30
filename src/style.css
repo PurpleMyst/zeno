@@ -71,6 +71,9 @@ main.minimize {
   /* Make it smol */
   width: 1rem;
   padding-right: 0;
+
+  /* round the top-right */
+  border-top-right-radius: 0.75rem;
 }
 
 main.minimize :not(#fold),
