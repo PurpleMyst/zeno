@@ -225,24 +225,26 @@ main.minimize #minimize:hover::before {
   height: auto;
 }
 
-/* Style our labels */
+/* Style our inputs */
+
+#inputs {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-auto-rows: max-content;
+}
 
 label {
   height: 2rem;
 }
 
-label > * {
-  width: calc(100% - 6.5rem);
-}
-
-label > *,
+input,
 #collapse {
   height: 1.5rem;
   border-radius: 0.75rem;
   border: 0.25rem solid lightgray;
 }
 
-label > :hover,
+input:hover,
 #collapse:hover {
   border: 0.25rem solid gray;
 }
@@ -258,7 +260,7 @@ label > :hover,
 
 #presets:focus-within,
 #collapse:focus,
-label > :focus {
+input:focus {
   border-color: black;
 }
 

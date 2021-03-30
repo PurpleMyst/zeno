@@ -1,6 +1,6 @@
 import styleCss from "./style.css";
 
-import { HookedMediaStream, Inputs, Values } from "./hookedMediaStream";
+import { HookedMediaStream, Values } from "./hookedMediaStream";
 import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
 
 (async function zeno() {
@@ -38,6 +38,7 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
 
   // Create form and apply our style.css
   const $form = document.createElement("form");
+  $form.id = "inputs";
   const $style = document.createElement("style");
   $style.textContent = styleCss;
 
@@ -47,6 +48,10 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
   );
 
   function createInput(key: string) {
+    const $label = document.createElement("label");
+    $label.textContent = key;
+    $form.append($label);
+
     const $input = document.createElement("input");
     $input.id = key;
     if (key === "freeze") {
@@ -59,21 +64,17 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
       $input.value = "0";
     }
     $input.classList.add("input");
+    if (savedValues) $input.value = savedValues[key];
+    $form.append($input);
 
     return $input;
   }
 
-  const inputs = Object.fromEntries(
-    "pillarbox,letterbox,freeze".split(",").map((key) => {
-      const $input = createInput(key);
-      if (savedValues) $input.value = savedValues[key];
-      const $label = document.createElement("label");
-      $label.textContent = key;
-      $form.append($label);
-      $label.append($input);
-      return [key, $input];
-    })
-  ) as Inputs;
+  const inputs = {
+    pillarbox: createInput("pillarbox"),
+    letterbox: createInput("letterbox"),
+    freeze: createInput("freeze"),
+  };
 
   const values = Object.fromEntries(
     Object.entries(inputs).map((entry) => [
@@ -109,21 +110,20 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
   // Create reset button
   const $resetLabel = document.createElement("label");
 
-  const $reset = document.createElement("button");
-  $reset.textContent = "do it";
-  $reset.id = "reset";
+  const $resetButton = document.createElement("button");
+  $resetButton.textContent = "do it";
+  $resetButton.id = "reset";
   $resetLabel.textContent = "reset";
 
-  $resetLabel.append($reset);
-
-  $resetLabel.addEventListener("click", (event) => {
+  $resetButton.addEventListener("click", (event) => {
+    // For some reason, the default action for a button is to.. refresh the page? Let's prevent that.
     event.preventDefault();
 
     // Reset all inputs
     Object.values(inputs).forEach(($input) => updateValue($input, 0));
   });
 
-  $form.append($resetLabel);
+  $form.append($resetLabel, $resetButton);
 
   // Create previews
   const $previews = document.createElement("div");
