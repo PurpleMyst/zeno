@@ -42,7 +42,6 @@ export class HookedMediaStream extends MediaStream {
     $previews?.append($enabled, $video, doubleBuffer.buffer.element);
 
     const freezeState = {
-      activated: false,
       needToInitialize: false,
       image: new Image(),
       canvas: createCanvas(),
@@ -51,7 +50,7 @@ export class HookedMediaStream extends MediaStream {
     freezeState.canvas.element.height = height;
 
     inputs.freeze.addEventListener("change", function () {
-      freezeState.activated = freezeState.needToInitialize = this.checked;
+      freezeState.needToInitialize = this.checked;
     });
 
     function draw() {
@@ -65,7 +64,7 @@ export class HookedMediaStream extends MediaStream {
       const pillarbox = (values.pillarbox * width) / 2;
       const letterbox = (values.letterbox * height) / 2;
 
-      if ($enabled.checked && freezeState.activated) {
+      if ($enabled.checked && inputs.freeze.checked) {
         if (freezeState.needToInitialize) {
           // Initialize frozen image
           freezeState.canvas.context.drawImage($video, 0, 0, width, height);
