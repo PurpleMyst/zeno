@@ -50,7 +50,7 @@ export class HookedMediaStream extends MediaStream {
     freezeState.canvas.element.height = height;
 
     inputs.freeze.addEventListener("change", function () {
-      freezeState.needToInitialize = this.checked;
+      freezeState.needToInitialize = true;
     });
 
     function draw() {
