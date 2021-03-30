@@ -112,17 +112,13 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
 
   // Create reset button
   const $resetLabel = document.createElement("label");
-
-  const $resetButton = document.createElement("button");
-  $resetButton.textContent = "do it";
-  $resetButton.id = "reset";
   $resetLabel.textContent = "reset";
 
-  $resetButton.addEventListener("click", (event) => {
-    // For some reason, the default action for a button is to.. refresh the page? Let's prevent that.
-    event.preventDefault();
-
-    // Reset all inputs
+  const $resetButton = document.createElement("button");
+  $resetButton.type = "button";
+  $resetButton.textContent = "do it";
+  $resetButton.id = "reset";
+  $resetButton.addEventListener("click", () => {
     Object.values(inputs).forEach(($input) => updateValue($input, 0));
   });
 
