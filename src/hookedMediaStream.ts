@@ -1,9 +1,4 @@
-import {
-  createCanvas,
-  DISPLAY_PREVIEW_CONTAINER,
-  DoubleBufferCanvas,
-  VIDEO_PREVIEW_CONTAINER,
-} from "./utils";
+import { createCanvas, DoubleBufferCanvas } from "./utils";
 
 export type Inputs = {
   [k in "pillarbox" | "letterbox" | "freeze"]: HTMLInputElement;
@@ -39,14 +34,8 @@ export class HookedMediaStream extends MediaStream {
     const doubleBuffer = new DoubleBufferCanvas(width, height);
 
     // Put video and display preview in their place
-    const $videoPreviewContainer = shadowRoot.getElementById(
-      VIDEO_PREVIEW_CONTAINER
-    );
-    $videoPreviewContainer?.append($video);
-    const $displayPreviewContainer = shadowRoot.getElementById(
-      DISPLAY_PREVIEW_CONTAINER
-    );
-    $displayPreviewContainer?.append(doubleBuffer.buffer.element);
+    const $previews = shadowRoot.getElementById("previews");
+    $previews?.append($video, doubleBuffer.buffer.element);
 
     const freezeState = {
       activated: false,
@@ -113,8 +102,8 @@ export class HookedMediaStream extends MediaStream {
       if (!newStream.active) {
         oldStream.getTracks().forEach((track) => track.stop());
         doubleBuffer.display.context.clearRect(0, 0, width, height);
-        $displayPreviewContainer?.removeChild(doubleBuffer.buffer.element);
-        $videoPreviewContainer?.removeChild($video);
+        $previews?.removeChild(doubleBuffer.buffer.element);
+        $previews?.removeChild($video);
         $video.srcObject = null;
         clearInterval(drawInterval);
       }

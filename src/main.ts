@@ -1,7 +1,6 @@
 import styleCss from "./style.css";
 
 import { HookedMediaStream, Values } from "./hookedMediaStream";
-import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
 
 (async function zeno() {
   "use strict";
@@ -128,30 +127,10 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
   const $previews = document.createElement("div");
   $previews.id = "previews";
 
-  // Create the preview container
-  const $previewContainer = document.createElement("div");
-  $previewContainer.id = "preview-container";
-
-  // Create the raw video preview
-  const $videoPreviewContainer = document.createElement("div");
-  $videoPreviewContainer.id = VIDEO_PREVIEW_CONTAINER;
-  $videoPreviewContainer.classList.add("preview");
-
-  // Create the filtered video preview
-  const $displayPreviewContainer = document.createElement("div");
-  $displayPreviewContainer.id = DISPLAY_PREVIEW_CONTAINER;
-  $displayPreviewContainer.classList.add("preview");
-
-  // Add them to the preview container
-  $previewContainer.append($videoPreviewContainer, $displayPreviewContainer);
-
   // Create title
   const $title = document.createElement("h1");
   $title.id = "title";
   $title.textContent = "↓ Zeno Studio ↓";
-
-  // Append everything to the $previews
-  $previews.append($previewContainer);
 
   const $fold = document.createElement("div");
   $fold.id = "fold";

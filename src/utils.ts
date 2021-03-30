@@ -1,6 +1,3 @@
-export const DISPLAY_PREVIEW_CONTAINER = "display-preview";
-export const VIDEO_PREVIEW_CONTAINER = "video-preview";
-
 export function createCanvas(): Canvas {
   const element = document.createElement("canvas");
   const context = element.getContext("2d")!;
