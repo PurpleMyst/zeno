@@ -65,7 +65,6 @@ import { HookedMediaStream, Values } from "./hookedMediaStream";
       $input.step = "0.00001";
       $input.value = "0";
     }
-    $input.classList.add("input");
     if (savedValues) $input.value = savedValues[key];
     $form.append($input);
 
@@ -151,7 +150,7 @@ import { HookedMediaStream, Values } from "./hookedMediaStream";
         await (navigator.mediaDevices as any).oldGetUserMedia(constraints),
         inputs,
         values,
-        $shadow
+        $previews
       );
     } else {
       return (navigator.mediaDevices as any).oldGetUserMedia(constraints);

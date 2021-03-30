@@ -139,8 +139,9 @@ main.minimize:hover #minimize::before {
 
 #previews {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: auto auto auto;
   grid-auto-rows: max-content;
+  align-items: center;
 }
 
 #previews video,

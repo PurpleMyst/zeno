@@ -13,7 +13,7 @@ export class HookedMediaStream extends MediaStream {
     oldStream: MediaStream,
     inputs: Inputs,
     values: Values,
-    shadowRoot: ShadowRoot
+    $previews: HTMLElement
   ) {
     // Copy original stream settings
     super(oldStream);
@@ -25,6 +25,11 @@ export class HookedMediaStream extends MediaStream {
     $video.setAttribute("muted", "");
     $video.srcObject = oldStream;
 
+    // Create enabled checkbox
+    const $enabled = document.createElement("input");
+    $enabled.type = "checkbox";
+    $enabled.checked = $previews.childElementCount === 0;
+
     // Read width/height from old stream
     const oldStreamSettings = oldStream.getVideoTracks()[0]!.getSettings();
     const width = oldStreamSettings.width!;
@@ -33,9 +38,8 @@ export class HookedMediaStream extends MediaStream {
     // Create our double buffer
     const doubleBuffer = new DoubleBufferCanvas(width, height);
 
-    // Put video and display preview in their place
-    const $previews = shadowRoot.getElementById("previews");
-    $previews?.append($video, doubleBuffer.buffer.element);
+    // Put checkbox, video and display preview in their place
+    $previews?.append($enabled, $video, doubleBuffer.buffer.element);
 
     const freezeState = {
       activated: false,
@@ -61,7 +65,7 @@ export class HookedMediaStream extends MediaStream {
       const pillarbox = (values.pillarbox * width) / 2;
       const letterbox = (values.letterbox * height) / 2;
 
-      if (freezeState.activated) {
+      if ($enabled.checked && freezeState.activated) {
         if (freezeState.needToInitialize) {
           // Initialize frozen image
           freezeState.canvas.context.drawImage($video, 0, 0, width, height);
@@ -86,13 +90,13 @@ export class HookedMediaStream extends MediaStream {
       }
 
       // Pillarbox: crop width
-      if (pillarbox) {
+      if ($enabled.checked && pillarbox) {
         context.clearRect(0, 0, pillarbox, height);
         context.clearRect(width, 0, -pillarbox, height);
       }
 
       // Letterbox: crop height
-      if (letterbox) {
+      if ($enabled.checked && letterbox) {
         context.clearRect(0, 0, width, letterbox);
         context.clearRect(0, height, width, -letterbox);
       }
@@ -102,8 +106,9 @@ export class HookedMediaStream extends MediaStream {
       if (!newStream.active) {
         oldStream.getTracks().forEach((track) => track.stop());
         doubleBuffer.display.context.clearRect(0, 0, width, height);
-        $previews?.removeChild(doubleBuffer.buffer.element);
-        $previews?.removeChild($video);
+        $previews.removeChild($enabled);
+        $previews.removeChild(doubleBuffer.buffer.element);
+        $previews.removeChild($video);
         $video.srcObject = null;
         clearInterval(drawInterval);
       }
