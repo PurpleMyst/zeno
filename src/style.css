@@ -1,14 +1,11 @@
 * {
+  /* Use the saner border-box box-sizing */
   box-sizing: border-box;
-  transition: all 200ms;
 }
+
 *:not(input) {
+  /* Do not allow selection of anything that isn't an input */
   user-select: none;
-}
-@media (prefers-reduced-motion) {
-  * {
-    transition: all 0s;
-  }
 }
 
 :focus {
@@ -65,7 +62,6 @@ main.focus {
   /* This reverts the "default" <main> transform which hides it above the page */
   transform: none;
 
-  border-radius: 0;
   padding-bottom: 1rem;
   cursor: default;
 }
@@ -90,8 +86,7 @@ main.minimize #minimize {
 
 /* Hide the fold when focused */
 main.focus #fold {
-  /* Use opacity to make it still affect layout */
-  opacity: 0;
+  display: none;
 }
 
 /* Minimize button */
@@ -137,7 +132,7 @@ main.minimize #minimize::before {
   content: "▶";
 }
 
-main.minimize #minimize:hover::before {
+main.minimize:hover #minimize::before {
   /* When hovered and minimized, move to the right */
   margin-left: 0;
 }
@@ -237,13 +232,15 @@ label {
   height: 2rem;
 }
 
+#inputs button,
 input,
 #collapse {
   height: 1.5rem;
-  border-radius: 0.75rem;
+  border-radius: 0.4rem;
   border: 0.25rem solid lightgray;
 }
 
+#inputs button:hover,
 input:hover,
 #collapse:hover {
   border: 0.25rem solid gray;
@@ -259,8 +256,7 @@ input:hover,
 }
 
 #presets:focus-within,
-#collapse:focus,
-input:focus {
+#collapse:focus {
   border-color: black;
 }
 

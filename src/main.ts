@@ -14,9 +14,9 @@ import { DISPLAY_PREVIEW_CONTAINER, VIDEO_PREVIEW_CONTAINER } from "./utils";
   const $main = document.createElement("main");
   $main.addEventListener("click", () => {
     if ($main.classList.contains("minimize")) {
-    $main.classList.remove("minimize");
+      $main.classList.remove("minimize");
     } else {
-    $main.classList.add("focus");
+      $main.classList.add("focus");
     }
   });
 
