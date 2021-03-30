@@ -15,7 +15,13 @@
   outline: 0;
 }
 
+button {
+  font-family: inherit;
+  font-size: 0.8rem;
+}
+
 main {
+  /* Position <main> above everything in the top left */
   z-index: 99999;
   position: fixed;
   left: 0;
@@ -23,41 +29,57 @@ main {
   width: 480px;
   max-width: 100vw;
   height: auto;
+
+  /* When unfocused, show just a portion of <main> */
+  transform: translateY(calc(-100% + 3rem));
+
+  /* <main> is a vertical flexbox container, justified towards the end */
   display: flex;
   flex-direction: column;
   justify-content: end;
+
+  /* When unfocused, hide the overflow */
+  overflow: hidden;
+
+  /* Indicate that <main> is clickable */
+  cursor: pointer;
+
+  /* General styling */
   background: white;
-  transform: translateY(calc(-100% + 3rem));
   box-shadow: 0 0.1rem 0.25rem #0004;
   border-radius: 0 0 0.75rem 0;
   padding: 1rem 1rem 0 1rem;
-  overflow: hidden;
   font-family: "Google Sans", Roboto, RobotDraft, Helvetica, sans-serif, serif;
   font-size: 1rem;
-  cursor: pointer;
 }
-button {
-  font-family: inherit;
-  font-size: 0.8rem;
-}
+
+/* Style for "collapse" text */
 main #collapse {
   background: white;
   cursor: pointer;
   margin-bottom: 0.5rem;
 }
+
+/* Focused <main> */
 main.focus {
+  /* This reverts the "default" <main> transform which hides it above the page */
   transform: none;
+
   border-radius: 0;
   padding-bottom: 1rem;
   cursor: default;
 }
+
+/* Minimized <main> */
 main.minimize {
+  /* Make it smol */
   width: 1rem;
   padding-right: 0;
 }
 
 main.minimize :not(#fold),
 main.minimize #fold :not(#minimize) {
+  /* Anything that's not the "unminimize" triangle should be hidden when minimized */
   display: none;
 }
 
@@ -66,47 +88,61 @@ main.minimize #minimize {
   margin-bottom: 1rem;
 }
 
-main.minimize #title {
-  opacity: 0;
-}
-
+/* Hide the fold when focused */
 main.focus #fold {
+  /* Use opacity to make it still affect layout */
   opacity: 0;
 }
 
 /* Minimize button */
 #minimize {
+  /* General styling */
   font-family: inherit;
   font-size: 0.5rem;
   font-weight: bold;
   color: #444;
-  margin-left: -1rem;
-  flex: 0 0 1rem;
-  width: 1rem;
   text-align: center;
   border: 0;
   background: white;
-  cursor: pointer;
   overflow-wrap: anywhere;
+
+  /* Indicate the triangle's clickability */
+  cursor: pointer;
+
+  /* Size the triangle as 1rem */
+  flex: 0 0 1rem;
+  width: 1rem;
+
+  /* Disable margin-bottom transition */
   transition: margin-bottom 0s;
+
+  /* When not minimized and not hovered, move to the left */
+  margin-left: -1rem;
 }
+
 #minimize::before {
   content: "◀";
   transition: inherit;
 }
+
 #minimize:hover::before,
-.minimize #minimize::before {
+main.minimize #minimize::before {
+  /* When hovered but not minimized, move to the right */
+  /* When not hovered but minimized, move to the left */
   margin-left: -2px;
 }
-.minimize #minimize::before {
+
+main.minimize #minimize::before {
+  /* Flip the triangle's direction when minimized to indicate unminimization */
   content: "▶";
 }
-.minimize #minimize:hover::before {
+
+main.minimize #minimize:hover::before {
+  /* When hovered and minimized, move to the right */
   margin-left: 0;
 }
 
 #previews {
-  /* margin-top: 1rem; */
   height: 100%;
   display: flex;
 }
@@ -130,14 +166,16 @@ main.focus #fold {
 }
 
 #preview-container {
-  width: inherit;
-  display: flex;
+  /* Should be as wide as its parent */
+  width: 100%;
+
+  /* Center everything */
   justify-content: center;
   align-items: center;
 }
 
 .preview {
-  width: 100%;
+  width: inherit;
 
   display: flex;
   flex-direction: column;
@@ -145,6 +183,7 @@ main.focus #fold {
 
 #preview-container video,
 #preview-container canvas {
+  /* The previews should be as wide as the preview container and as high as possible */
   width: inherit;
   height: 100%;
 }
@@ -158,7 +197,8 @@ main.focus #fold {
 }
 
 :hover #title {
-  transform: translateY(0.1rem); /* Tiny nudge downwards */
+  /* Tiny nudge downwards */
+  transform: translateY(0.1rem);
 }
 
 /* Turn the "fold" into a CSS grid. */
@@ -170,10 +210,6 @@ main.focus #fold {
 #fold * {
   grid-row: 1;
   grid-column: 1;
-}
-
-#preview-container {
-  width: inherit;
 }
 
 /* Show/hide the previews if focused/unfocused */
@@ -189,23 +225,7 @@ main.focus #fold {
   height: auto;
 }
 
-#presets,
-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-#presets > * {
-  border: 0;
-  background: transparent;
-  flex-grow: 1;
-}
-#presets > :first-child {
-  border-radius: 100px 0 0 100px;
-}
-#presets > :last-child {
-  border-radius: 0 100px 100px 0;
-}
+/* Style our labels */
 
 label {
   height: 2rem;
@@ -241,6 +261,8 @@ label > :hover,
 label > :focus {
   border-color: black;
 }
+
+/* Style our inputs */
 
 input[type="range"] {
   -webkit-appearance: none;
