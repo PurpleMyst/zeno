@@ -2,7 +2,11 @@ import { Playback } from "./playback";
 import { DoubleBufferCanvas } from "./utils";
 
 export type Inputs = {
-  [k in "pillarbox" | "letterbox" | "freeze"]: HTMLInputElement;
+  [k in
+    | "pillarbox"
+    | "letterbox"
+    | "playbackDuration"
+    | "playback"]: HTMLInputElement;
 };
 
 // Background Blur for Google Meet does this (hello@brownfoxlabs.com)
@@ -36,11 +40,18 @@ export class HookedMediaStream extends MediaStream {
     $previews?.append($enabled, $video, doubleBuffer.buffer.element);
 
     // Create the playback manager instance
-    const playback = new Playback(width, height, 30 * 2);
+    const playback = new Playback(
+      width,
+      height,
+      inputs.playbackDuration.valueAsNumber * 30
+    );
 
     // If we enable/disable freeze or effects alltogether, let's reset the frames
-    inputs.freeze.addEventListener("change", function () {
+    inputs.playback.addEventListener("change", function () {
       playback.clearFrames();
+    });
+    inputs.playbackDuration.addEventListener("change", function () {
+      playback.setFrameCount(this.valueAsNumber * 30);
     });
     $enabled.addEventListener("change", function () {
       playback.clearFrames();
@@ -59,9 +70,15 @@ export class HookedMediaStream extends MediaStream {
 
       if (
         $enabled.checked &&
-        inputs.freeze.checked &&
+        inputs.playback.checked &&
         playback.hasFullBuffer()
       ) {
+        if (canvas.classList.contains("recording")) {
+          canvas.classList.remove("recording");
+          canvas.classList.add("playback");
+          playback.doneRecording();
+        }
+
         // If effects and freeze are enabled, and we have a full playback
         // buffer, let's draw from the playback
         playback.draw(context);
@@ -69,8 +86,16 @@ export class HookedMediaStream extends MediaStream {
         // If effects and freeze aren't both enabled or we don't have a full
         // playback buffer, let's just draw the current video and record it to
         // the playback buffer
+        canvas.classList.remove("playback", "recording");
         context.drawImage($video, 0, 0);
-        playback.record(canvas);
+        if (
+          $enabled.checked &&
+          inputs.playback.checked &&
+          !playback.hasFullBuffer()
+        ) {
+          playback.record(canvas);
+          canvas.classList.add("recording");
+        }
       } else {
         // Draw preview stripes if video doesn't exist
         "18, 100%, 68%; -10,100%,80%; 5, 90%, 72%; 48, 100%, 75%; 36, 100%, 70%; 20, 90%, 70%"

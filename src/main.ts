@@ -44,15 +44,21 @@ import { HookedMediaStream } from "./hookedMediaStream";
   const $style = document.createElement("style");
   $style.textContent = styleCss;
 
-  function createInput(key: string) {
+  function createInput(key: string, label?: string) {
     const $label = document.createElement("label");
-    $label.textContent = key;
+    $label.textContent = label ?? key;
     $form.append($label);
 
     const $input = document.createElement("input");
     $input.id = key;
-    if (key === "freeze") {
+    if (key === "playback") {
       $input.type = "checkbox";
+    } else if (key === "playbackDuration") {
+      $input.type = "number";
+      $input.min = "1";
+      $input.max = "10";
+      $input.step = "1";
+      $input.value = "2";
     } else {
       $input.type = "range";
       $input.min = ["pillarbox", "letterbox"].includes(key) ? "0" : "-1";
@@ -74,7 +80,8 @@ import { HookedMediaStream } from "./hookedMediaStream";
   const inputs = {
     pillarbox: createInput("pillarbox"),
     letterbox: createInput("letterbox"),
-    freeze: createInput("freeze"),
+    playback: createInput("playback"),
+    playbackDuration: createInput("playbackDuration", "playback duration"),
   };
 
   function updateStoredValue($input: HTMLInputElement, value: any) {
@@ -92,8 +99,8 @@ import { HookedMediaStream } from "./hookedMediaStream";
     )
       return;
     event.preventDefault();
-    event.target.valueAsNumber = 0;
-    updateStoredValue(event.target, 0);
+    event.target.value = event.target.min;
+    updateStoredValue(event.target, event.target.valueAsNumber);
   });
 
   // Update value on change
@@ -114,8 +121,8 @@ import { HookedMediaStream } from "./hookedMediaStream";
   $resetButton.addEventListener("click", () => {
     Object.values(inputs).forEach(($input) => {
       if ($input.type === "checkbox") return;
-      $input.valueAsNumber = 0;
-      updateStoredValue($input, 0);
+      $input.value = $input.min;
+      updateStoredValue($input, $input.valueAsNumber);
     });
   });
 
