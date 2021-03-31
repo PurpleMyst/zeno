@@ -1,4 +1,5 @@
-import { createCanvas, DoubleBufferCanvas } from "./utils";
+import { Playback } from "./playback";
+import { DoubleBufferCanvas } from "./utils";
 
 export type Inputs = {
   [k in "pillarbox" | "letterbox" | "freeze"]: HTMLInputElement;
@@ -41,20 +42,19 @@ export class HookedMediaStream extends MediaStream {
     // Put checkbox, video and display preview in their place
     $previews?.append($enabled, $video, doubleBuffer.buffer.element);
 
-    const freezeState = {
-      needToInitialize: false,
-      image: new Image(),
-      canvas: createCanvas(),
-    };
-    freezeState.canvas.element.width = width;
-    freezeState.canvas.element.height = height;
+    // Create the playback manager instance
+    const playback = new Playback(width, height, 30 * 2);
 
+    // If we enable/disable freeze or effects alltogether, let's reset the frames
     inputs.freeze.addEventListener("change", function () {
-      freezeState.needToInitialize = true;
+      playback.clearFrames();
+    });
+    $enabled.addEventListener("change", function () {
+      playback.clearFrames();
     });
 
-    function draw() {
-      const context = doubleBuffer.buffer.context;
+    async function draw() {
+      const { context, element: canvas } = doubleBuffer.buffer;
       context.textAlign = "center";
       context.textBaseline = "middle";
 
@@ -64,20 +64,20 @@ export class HookedMediaStream extends MediaStream {
       const pillarbox = (values.pillarbox * width) / 2;
       const letterbox = (values.letterbox * height) / 2;
 
-      if ($enabled.checked && inputs.freeze.checked) {
-        if (freezeState.needToInitialize) {
-          // Initialize frozen image
-          freezeState.canvas.context.drawImage($video, 0, 0, width, height);
-          const src = freezeState.canvas.element.toDataURL("image/png");
-          freezeState.image.src = src;
-          freezeState.needToInitialize = false;
-        }
-
-        // Draw frozen image
-        context.drawImage(freezeState.image, 0, 0, width, height);
+      if (
+        $enabled.checked &&
+        inputs.freeze.checked &&
+        playback.hasFullBuffer()
+      ) {
+        // If effects and freeze are enabled, and we have a full playback
+        // buffer, let's draw from the playback
+        playback.draw(context);
       } else if ($video.srcObject) {
-        // Draw video
-        context.drawImage($video, 0, 0, width, height);
+        // If effects and freeze aren't both enabled or we don't have a full
+        // playback buffer, let's just draw the current video and record it to
+        // the playback buffer
+        context.drawImage($video, 0, 0);
+        playback.record(canvas);
       } else {
         // Draw preview stripes if video doesn't exist
         "18, 100%, 68%; -10,100%,80%; 5, 90%, 72%; 48, 100%, 75%; 36, 100%, 70%; 20, 90%, 70%"
@@ -109,12 +109,12 @@ export class HookedMediaStream extends MediaStream {
         $previews.removeChild(doubleBuffer.buffer.element);
         $previews.removeChild($video);
         $video.srcObject = null;
-        clearInterval(drawInterval);
+        return;
       }
-    }
 
-    // Redraw at 30FPS
-    const drawInterval = setInterval(draw, 33);
+      setTimeout(draw, 33);
+    }
+    setTimeout(draw, 33);
 
     // Create a MediaStream from our display canvas
     // @ts-expect-error

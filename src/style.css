@@ -212,10 +212,7 @@ main.minimize:hover #minimize::before {
   display: grid;
   grid-template-columns: auto auto;
   grid-auto-rows: max-content;
-}
-
-label {
-  height: 2rem;
+  margin: 1rem 0 1rem 0;
 }
 
 #inputs button,
