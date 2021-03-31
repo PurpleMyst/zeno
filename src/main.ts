@@ -1,6 +1,6 @@
 import styleCss from "./style.css";
 
-import { HookedMediaStream, Values } from "./hookedMediaStream";
+import { HookedMediaStream } from "./hookedMediaStream";
 
 (async function zeno() {
   "use strict";
@@ -44,11 +44,6 @@ import { HookedMediaStream, Values } from "./hookedMediaStream";
   const $style = document.createElement("style");
   $style.textContent = styleCss;
 
-  // Create inputs
-  const savedValues = JSON.parse(
-    window.localStorage.getItem("zeno-values") ?? "{}"
-  );
-
   function createInput(key: string) {
     const $label = document.createElement("label");
     $label.textContent = key;
@@ -65,7 +60,12 @@ import { HookedMediaStream, Values } from "./hookedMediaStream";
       $input.step = "0.00001";
       $input.value = "0";
     }
-    if (savedValues) $input.value = savedValues[key];
+
+    const savedValue = JSON.parse(
+      window.localStorage.getItem(`zeno-value-${$input.id}`) ?? "null"
+    );
+    if (savedValue !== null) $input.value = savedValue;
+
     $form.append($input);
 
     return $input;
@@ -77,35 +77,30 @@ import { HookedMediaStream, Values } from "./hookedMediaStream";
     freeze: createInput("freeze"),
   };
 
-  const values = Object.fromEntries(
-    Object.entries(inputs).map((entry) => [
-      entry[0],
-      entry[1].valueAsNumber || +entry[1].value,
-    ])
-  ) as Values;
-
-  function updateValue($input: HTMLInputElement, value: number) {
-    (values as any)[$input.id] = $input.valueAsNumber = value;
-
-    window.localStorage.setItem("zeno-values", JSON.stringify(values));
+  function updateStoredValue($input: HTMLInputElement, value: any) {
+    window.localStorage.setItem(
+      `zeno-value-${$input.id}`,
+      JSON.stringify(value)
+    );
   }
 
   // Reset the input on right click
   $form.addEventListener("contextmenu", (event) => {
     if (
       !(event.target instanceof HTMLInputElement) ||
-      event.target.type !== "range"
+      event.target.type === "checkbox"
     )
       return;
     event.preventDefault();
-    updateValue(event.target, 0);
+    event.target.valueAsNumber = 0;
+    updateStoredValue(event.target, 0);
   });
 
   // Update value on change
   $form.addEventListener("input", (event) => {
     const $input = event.target;
     if ($input instanceof HTMLInputElement)
-      updateValue($input, $input.valueAsNumber);
+      updateStoredValue($input, $input.valueAsNumber);
   });
 
   // Create reset button
@@ -117,7 +112,11 @@ import { HookedMediaStream, Values } from "./hookedMediaStream";
   $resetButton.textContent = "do it";
   $resetButton.id = "reset";
   $resetButton.addEventListener("click", () => {
-    Object.values(inputs).forEach(($input) => updateValue($input, 0));
+    Object.values(inputs).forEach(($input) => {
+      if ($input.type === "checkbox") return;
+      $input.valueAsNumber = 0;
+      updateStoredValue($input, 0);
+    });
   });
 
   $form.append($resetLabel, $resetButton);
@@ -149,7 +148,6 @@ import { HookedMediaStream, Values } from "./hookedMediaStream";
       return new HookedMediaStream(
         await (navigator.mediaDevices as any).oldGetUserMedia(constraints),
         inputs,
-        values,
         $previews
       );
     } else {

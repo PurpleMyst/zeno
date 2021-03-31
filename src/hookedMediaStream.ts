@@ -5,17 +5,10 @@ export type Inputs = {
   [k in "pillarbox" | "letterbox" | "freeze"]: HTMLInputElement;
 };
 
-export type Values = { [k in keyof Inputs]: number };
-
 // Background Blur for Google Meet does this (hello@brownfoxlabs.com)
 
 export class HookedMediaStream extends MediaStream {
-  constructor(
-    oldStream: MediaStream,
-    inputs: Inputs,
-    values: Values,
-    $previews: HTMLElement
-  ) {
+  constructor(oldStream: MediaStream, inputs: Inputs, $previews: HTMLElement) {
     // Copy original stream settings
     super(oldStream);
 
@@ -61,8 +54,8 @@ export class HookedMediaStream extends MediaStream {
       context.clearRect(0, 0, width, height);
 
       // Get values
-      const pillarbox = (values.pillarbox * width) / 2;
-      const letterbox = (values.letterbox * height) / 2;
+      const pillarbox = (inputs.pillarbox.valueAsNumber * width) / 2;
+      const letterbox = (inputs.letterbox.valueAsNumber * height) / 2;
 
       if (
         $enabled.checked &&
