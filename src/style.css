@@ -144,10 +144,7 @@ main.minimize:hover #minimize::before {
   grid-template-columns: auto auto auto;
   grid-auto-rows: max-content;
   align-items: center;
-}
-
-#previews * {
-  margin: 0.25rem;
+  grid-gap: 0.25rem;
 }
 
 #previews video,
