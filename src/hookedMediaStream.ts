@@ -11,6 +11,12 @@ export type Inputs = {
 
 // Background Blur for Google Meet does this (hello@brownfoxlabs.com)
 
+declare global {
+  interface HTMLCanvasElement {
+    captureStream(frameRate?: number): MediaStream;
+  }
+}
+
 export class HookedMediaStream extends MediaStream {
   constructor(oldStream: MediaStream, inputs: Inputs, $previews: HTMLElement) {
     // Copy original stream settings
@@ -135,7 +141,6 @@ export class HookedMediaStream extends MediaStream {
     setTimeout(draw, 33);
 
     // Create a MediaStream from our display canvas
-    // @ts-expect-error
     const newStream = doubleBuffer.display.element.captureStream(30);
     return newStream;
   }
