@@ -89,10 +89,10 @@ import { HookedMediaStream } from "./hookedMediaStream";
     playbackDuration: createInput("playbackDuration", "playback duration"),
   };
 
-  function updateStoredValue($input: HTMLInputElement, value: any) {
+  function updateStoredValue($input: HTMLInputElement) {
     window.localStorage.setItem(
       `zeno-value-${$input.id}`,
-      JSON.stringify(value)
+      JSON.stringify($input.valueAsNumber)
     );
   }
 
@@ -105,14 +105,13 @@ import { HookedMediaStream } from "./hookedMediaStream";
       return;
     event.preventDefault();
     event.target.value = event.target.min;
-    updateStoredValue(event.target, event.target.valueAsNumber);
+    updateStoredValue(event.target);
   });
 
   // Update value on change
   $form.addEventListener("input", (event) => {
     const $input = event.target;
-    if ($input instanceof HTMLInputElement)
-      updateStoredValue($input, $input.valueAsNumber);
+    if ($input instanceof HTMLInputElement) updateStoredValue($input);
   });
 
   // Create reset button
@@ -127,7 +126,7 @@ import { HookedMediaStream } from "./hookedMediaStream";
     Object.values(inputs).forEach(($input) => {
       if ($input.type === "checkbox") return;
       $input.value = $input.min;
-      updateStoredValue($input, $input.valueAsNumber);
+      updateStoredValue($input);
     });
   });
 
