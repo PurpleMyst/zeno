@@ -51,20 +51,25 @@ import { HookedMediaStream } from "./hookedMediaStream";
 
     const $input = document.createElement("input");
     $input.id = key;
-    if (key === "playback") {
-      $input.type = "checkbox";
-    } else if (key === "playbackDuration") {
-      $input.type = "number";
-      $input.min = "1";
-      $input.max = "10";
-      $input.step = "1";
-      $input.value = "2";
-    } else {
-      $input.type = "range";
-      $input.min = ["pillarbox", "letterbox"].includes(key) ? "0" : "-1";
-      $input.max = "1";
-      $input.step = "0.00001";
-      $input.value = "0";
+    switch (key) {
+      case "playback":
+        $input.type = "checkbox";
+        break;
+
+      case "playbackDuration":
+        $input.type = "number";
+        $input.min = "1";
+        $input.max = "10";
+        $input.step = "1";
+        $input.value = "2";
+        break;
+
+      default:
+        $input.type = "range";
+        $input.min = ["pillarbox", "letterbox"].includes(key) ? "0" : "-1";
+        $input.max = "1";
+        $input.step = "0.00001";
+        $input.value = "0";
     }
 
     const savedValue = JSON.parse(
