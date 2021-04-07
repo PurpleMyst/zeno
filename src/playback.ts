@@ -7,6 +7,8 @@ export class Playback {
   private idx: number = 0;
   private ltr: boolean = true;
 
+  private recordingStart: DOMHighResTimeStamp = performance.now();
+
   public constructor(
     public readonly width: number,
     public readonly height: number,
@@ -54,6 +56,7 @@ export class Playback {
     this.frames = [];
     this.idx = 0;
     this.ltr = true;
+    this.recordingStart = performance.now();
   }
 
   public setFrameCount(frameCount: number) {
@@ -62,6 +65,8 @@ export class Playback {
   }
 
   public doneRecording() {
+    const recordingEnd = performance.now();
+    console.log(`Recording took ${recordingEnd - this.recordingStart}ms`);
     this.idx = this.frames.length;
   }
 }

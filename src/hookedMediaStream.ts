@@ -1,5 +1,5 @@
 import { Playback } from "./playback";
-import { DoubleBufferCanvas } from "./utils";
+import { DoubleBufferCanvas, setAdjustedInterval } from "./utils";
 
 export type Inputs = {
   [k in
@@ -135,10 +135,8 @@ export class HookedMediaStream extends MediaStream {
         $video.srcObject = null;
         return;
       }
-
-      setTimeout(draw, 33);
     }
-    setTimeout(draw, 33);
+    setAdjustedInterval(33, draw);
 
     // Create a MediaStream from our display canvas
     const newStream = doubleBuffer.display.element.captureStream(30);
