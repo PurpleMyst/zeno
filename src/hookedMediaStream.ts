@@ -63,7 +63,7 @@ export class HookedMediaStream extends MediaStream {
       playback.clearFrames();
     });
 
-    async function draw() {
+    function draw() {
       const { context, element: canvas } = doubleBuffer.buffer;
       context.textAlign = "center";
       context.textBaseline = "middle";
