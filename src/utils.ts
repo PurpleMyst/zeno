@@ -64,26 +64,19 @@ export function setAdjustedInterval(interval: number, callback: () => void) {
   const driftHistorySamples = 10;
   let driftCorrection = 0;
 
-  function calc_drift(arr: number[]): number {
-    // Calculate drift correction.
-
-    /*
-  In this example I've used a simple median.
-  You can use other methods, but it's important not to use an average. 
-  If the user switches tabs and back, an average would put far too much
-  weight on the outlier.
-  */
-
-    const values = arr.concat(); // copy array so it isn't mutated
-
-    values.sort(function (a, b) {
-      return a - b;
-    });
+  /**
+   * Calculate the drift of an array utilizing the median.
+   * The median is chosen to avoid outliers swinging the drift too much.
+   * Outliers happen, for example, when the user switches tabs and back
+   */
+  function calculateDrift(arr: number[]): number {
+    // Use concat to make a copy of the array.
+    const values = arr.concat();
+    values.sort((a, b) => a - b);
     if (values.length === 0) return 0;
-    const half = Math.floor(values.length / 2);
-    if (values.length % 2) return values[half]!;
-    const median = (values[half - 1]! + values[half]!) / 2.0;
-
+    const middle = Math.floor(values.length / 2);
+    if (values.length % 2 !== 0) return values[middle]!;
+    const median = (values[middle - 1]! + values[middle]!) / 2;
     return median;
   }
 
@@ -100,7 +93,7 @@ export function setAdjustedInterval(interval: number, callback: () => void) {
       driftHistory.push(dt + driftCorrection);
 
       // predict new drift correction
-      driftCorrection = calc_drift(driftHistory);
+      driftCorrection = calculateDrift(driftHistory);
 
       // cap and refresh samples
       if (driftHistory.length >= driftHistorySamples) {
