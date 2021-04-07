@@ -151,22 +151,18 @@ import { HookedMediaStream } from "./hookedMediaStream";
   document.body.append($host);
 
   /** Intercept the user's camera to hook our patched MediaStream onto it */
-  async function hookedGetUserMedia(constraints: {
-    video: unknown;
-    audio: unknown;
-  }) {
+  async function hookedGetUserMedia(constraints?: MediaStreamConstraints) {
     if (constraints && constraints.video && !constraints.audio) {
       return new HookedMediaStream(
-        await (navigator.mediaDevices as any).oldGetUserMedia(constraints),
+        await navigator.mediaDevices.oldGetUserMedia(constraints),
         inputs,
         $previews
       );
     } else {
-      return (navigator.mediaDevices as any).oldGetUserMedia(constraints);
+      return navigator.mediaDevices.oldGetUserMedia(constraints);
     }
   }
 
-  (MediaDevices.prototype as any).oldGetUserMedia =
-    MediaDevices.prototype.getUserMedia;
-  (MediaDevices.prototype.getUserMedia as any) = hookedGetUserMedia;
+  MediaDevices.prototype.oldGetUserMedia = MediaDevices.prototype.getUserMedia;
+  MediaDevices.prototype.getUserMedia = hookedGetUserMedia;
 })();

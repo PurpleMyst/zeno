@@ -15,6 +15,10 @@ declare global {
   interface HTMLCanvasElement {
     captureStream(frameRate?: number): MediaStream;
   }
+
+  interface MediaDevices {
+    oldGetUserMedia(constraints?: MediaStreamConstraints): Promise<MediaStream>;
+  }
 }
 
 export class HookedMediaStream extends MediaStream {
