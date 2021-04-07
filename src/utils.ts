@@ -30,32 +30,6 @@ export class DoubleBufferCanvas {
   }
 }
 
-export function getCanvasImage(
-  canvas: HTMLCanvasElement
-): Promise<HTMLImageElement | null> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob === null) {
-        resolve(null);
-        return;
-      }
-
-      const url = URL.createObjectURL(blob);
-      const img = new Image();
-
-      img.onload = function () {
-        URL.revokeObjectURL(url);
-        resolve(img);
-      };
-      img.onerror = function (err) {
-        reject(err);
-      };
-
-      img.src = url;
-    });
-  });
-}
-
 // https://stackoverflow.com/a/55266303
 export function setAdjustedInterval(interval: number, callback: () => void) {
   let expected = Date.now() + interval;
@@ -82,8 +56,7 @@ export function setAdjustedInterval(interval: number, callback: () => void) {
 
   setTimeout(step, interval);
   function step() {
-    const dt = Date.now() - expected; // the drift (positive for overshooting)
-    // do what is to be done
+    const dt = Date.now() - expected;
     callback();
 
     // don't update the history for exceptionally large values

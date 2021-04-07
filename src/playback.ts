@@ -1,7 +1,7 @@
-import { Canvas, createCanvas, getCanvasImage } from "./utils";
+import { Canvas, createCanvas } from "./utils";
 
 export class Playback {
-  public frames: HTMLImageElement[] = [];
+  public frames: ImageData[] = [];
 
   private canvas: Canvas = createCanvas();
   private idx: number = 0;
@@ -22,18 +22,15 @@ export class Playback {
     return this.frames.length >= this.frameCount;
   }
 
-  public record(canvas: HTMLCanvasElement) {
+  public record(ctx: CanvasRenderingContext2D) {
     if (this.hasFullBuffer()) return;
-
-    getCanvasImage(canvas).then((frame) => {
-      if (frame !== null) this.frames.push(frame);
-    });
+    this.frames.push(ctx.getImageData(0, 0, this.width, this.height));
   }
 
   public draw(context: CanvasRenderingContext2D) {
     const frame = this.frames[this.idx];
     if (frame === undefined) return;
-    context.drawImage(frame, 0, 0);
+    context.putImageData(frame, 0, 0);
 
     if (this.ltr) {
       if (this.idx === this.frames.length - 1) {
@@ -67,10 +64,12 @@ export class Playback {
   public doneRecording() {
     const recordingEnd = performance.now();
     const elapsed = recordingEnd - this.recordingStart;
-    const fps = this.frameCount / (elapsed / 1000);
+    const fps = (this.frameCount / (elapsed / 1000)).toFixed(2);
     console.log(
-      `Recording took ${elapsed}ms (avg. framerate ${fps.toFixed(2)} FPS)`
+      `[%cZENO%c] Recording took ${elapsed}ms (avg. framerate ${fps} FPS)`,
+      "color: #c03822",
+      ""
     );
-    this.idx = this.frames.length;
+    this.idx = this.frames.length - 1;
   }
 }

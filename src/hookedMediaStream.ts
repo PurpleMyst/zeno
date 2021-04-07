@@ -99,7 +99,7 @@ export class HookedMediaStream extends MediaStream {
           inputs.playback.checked &&
           !playback.hasFullBuffer()
         ) {
-          playback.record(canvas);
+          playback.record(context);
           canvas.classList.add("recording");
         }
       } else {
