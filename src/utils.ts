@@ -32,7 +32,7 @@ export class DoubleBufferCanvas {
 
 // https://stackoverflow.com/a/55266303
 export function setAdjustedInterval(interval: number, callback: () => void) {
-  let expected = Date.now() + interval;
+  let expected = performance.now() + interval;
 
   const driftHistory: number[] = [];
   const driftHistorySamples = 10;
@@ -56,11 +56,12 @@ export function setAdjustedInterval(interval: number, callback: () => void) {
 
   setTimeout(step, interval);
   function step() {
-    const dt = Date.now() - expected;
     callback();
 
-    // don't update the history for exceptionally large values
+    const dt = performance.now() - expected;
     if (dt <= interval) {
+      // don't update the history for exceptionally large values
+
       // sample drift amount to history after removing current correction
       // (add to remove because the correction is applied by subtraction)
       driftHistory.push(dt + driftCorrection);
