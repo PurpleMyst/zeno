@@ -66,7 +66,11 @@ export class Playback {
 
   public doneRecording() {
     const recordingEnd = performance.now();
-    console.log(`Recording took ${recordingEnd - this.recordingStart}ms`);
+    const elapsed = recordingEnd - this.recordingStart;
+    const fps = this.frameCount / (elapsed / 1000);
+    console.log(
+      `Recording took ${elapsed}ms (avg. framerate ${fps.toFixed(2)} FPS)`
+    );
     this.idx = this.frames.length;
   }
 }
