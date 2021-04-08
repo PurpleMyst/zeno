@@ -30,7 +30,7 @@ esbuild
     bundle: true,
     minify: true,
     target: ["firefox87"],
-    outfile: "dist/bookmarklet.js",
+    outfile: "dist/main.js",
     plugins: [minifyTextualCssPlugin],
   })
   .catch((error) => {
